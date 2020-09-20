@@ -1,0 +1,52 @@
+version: '3'
+services: 
+    nginx:
+        build:
+            context: ./nginx
+        container_name: mynginx
+        ports:
+            - 80:80
+        volumes:
+            - ${WORKSPACE_WEBROOT_VHOST_PATH}:/etc/nginx/conf.d
+            - ${WORKSPACE_WEBROOT_PATH}:${CONTAINER_WEBROOT_PATH}
+        links:
+            - php-fpm
+        depends_on:
+            - php-fpm
+    php-fpm:
+        build:
+            context: ./php
+            args:
+                - WEBROOT_PATH=${CONTAINER_WEBROOT_PATH}
+                - PHP_VERSION=${PHP_VERSION}
+                - INSTALL_PHPREDIS_EXTENSION=${INSTALL_PHPREDIS_EXTENSION}
+                - PHPREDIS_VERSION=${PHPREDIS_VERSION}
+        container_name: myphp
+        volumes:
+            - ${WORKSPACE_WEBROOT_PATH}:${CONTAINER_WEBROOT_PATH}
+            - ${PWD}/php/php.ini:/usr/local/etc/php/php.ini
+            - ${PWD}/php/php_errors.log:/tmp/php_errors.log
+    mysql:
+        build:
+            context: ./mysql
+            args:
+                - MYSQL_VERSION=${MYSQL_VERSION}
+        environment:
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - TZ=${WORKSPACE_TIMEZONE}
+        container_name: mysql
+        ports:
+            - ${LOCAL_MYSQL_PORT}:3306
+        volumes:
+            - ${LOCAL_MYSQL_DATA_PATH}:/var/lib/mysql
+            - ./mysql/my.cnf:/etc/alternatives/my.cnf
+            - ./mysql/slow.log:/tmp/slow.log
+    redis:
+        build:
+            context: ./redis
+        container_name: myredis
+        ports:
+            - ${LOCAL_REDIS_PORT}:6379
+        volumes:
+            - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+            - ${LOCAL_REDIS_DATA_PATH}:/data
