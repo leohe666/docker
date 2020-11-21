@@ -16,7 +16,27 @@ RUN if [ ${INSTALL_PHPREDIS_EXTENSION} = true ];  then \
     && rm -rf /usr/src/php \
     && rm -rf /tmp/redis.tar.gz \
 ;fi
-    # && pecl install -o -f redis \
-    # && docker-php-ext-enable redis \
-    # && rm -rf /tmp/pear \
-    # && docker-php-ext-install redis
+ARG INSTALL_ZIP_EXTENSION=false
+RUN if [ ${INSTALL_ZIP_EXTENSION} = true ];  then \
+    apt-get update && apt-get install -y libzip-dev zlib1g-dev \
+    && docker-php-ext-install zip \
+;fi
+ARG INSTALL_BCMATH_EXTENSION=false
+RUN if [ ${INSTALL_BCMATH_EXTENSION} = true ];  then \
+    docker-php-ext-install bcmath \
+;fi
+ARG INSTALL_MYSQLI_EXTENSION=false
+RUN if [ ${INSTALL_MYSQLI_EXTENSION} = true ];  then \
+    docker-php-ext-install mysqli \
+;fi
+ARG INSTALL_MONGODB_EXTENSION=false
+ARG MONGODB_EXTENSION_VERSION=1.8.2
+RUN if [ ${INSTALL_MONGODB_EXTENSION} = true ];  then \
+    curl -L -o /tmp/mongodb.tgz https://pecl.php.net/get/mongodb-${MONGODB_EXTENSION_VERSION}.tgz \
+    && tar xfz /tmp/mongodb.tgz \
+    && mkdir -p /usr/src/php/ext \
+    && mv mongodb-${MONGODB_EXTENSION_VERSION} /usr/src/php/ext/mongodb \
+    && docker-php-ext-install mongodb \
+    && rm -rf /usr/src/php \
+    && rm -rf /tmp/mongodb.tgz \
+;fi

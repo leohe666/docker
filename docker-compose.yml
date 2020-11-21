@@ -1,4 +1,9 @@
 version: '3'
+networks:
+    frontend:
+        driver: ${NETWORKS_DRIVER}
+    backend:
+        driver: ${NETWORKS_DRIVER}
 services: 
     nginx:
         build:
@@ -13,19 +18,33 @@ services:
             - php-fpm
         depends_on:
             - php-fpm
+        networks:
+            frontend:
+                aliases:
+                    - test.test.com
+            backend:
+                aliases:
+                    - test.test.com
     php-fpm:
         build:
             context: ./php
             args:
                 - WEBROOT_PATH=${CONTAINER_WEBROOT_PATH}
                 - PHP_VERSION=${PHP_VERSION}
-                - INSTALL_PHPREDIS_EXTENSION=${INSTALL_PHPREDIS_EXTENSION}
                 - PHPREDIS_VERSION=${PHPREDIS_VERSION}
+                - INSTALL_PHPREDIS_EXTENSION=${INSTALL_PHPREDIS_EXTENSION}
+                - INSTALL_ZIP_EXTENSION=${INSTALL_ZIP_EXTENSION}
+                - INSTALL_BCMATH_EXTENSION=${INSTALL_BCMATH_EXTENSION}
+                - INSTALL_MYSQLI_EXTENSION=${INSTALL_MYSQLI_EXTENSION}
+                - MONGODB_EXTENSION_VERSION=${MONGODB_EXTENSION_VERSION}
+                - INSTALL_MONGODB_EXTENSION=${INSTALL_MONGODB_EXTENSION}
         container_name: myphp
         volumes:
             - ${WORKSPACE_WEBROOT_PATH}:${CONTAINER_WEBROOT_PATH}
-            - ${PWD}/php/php.ini:/usr/local/etc/php/php.ini
-            - ${PWD}/php/php_errors.log:/tmp/php_errors.log
+            - ./php/php.ini:/usr/local/etc/php/php.ini
+            - ./php/php_errors.log:/tmp/php_errors.log
+        networks:
+            - backend
     mysql:
         build:
             context: ./mysql
@@ -41,6 +60,8 @@ services:
             - ${LOCAL_MYSQL_DATA_PATH}:/var/lib/mysql
             - ./mysql/my.cnf:/etc/alternatives/my.cnf
             - ./mysql/slow.log:/tmp/slow.log
+        networks:
+            - backend
     redis:
         build:
             context: ./redis
@@ -50,3 +71,5 @@ services:
         volumes:
             - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
             - ${LOCAL_REDIS_DATA_PATH}:/data
+        networks:
+            - backend
