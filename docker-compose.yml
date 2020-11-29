@@ -62,6 +62,19 @@ services:
             - ./mysql/slow.log:/tmp/slow.log
         networks:
             - backend
+    mycat:
+        build:
+            context: ./mycat
+        container_name: mycat
+        ports:
+            - "8066:8066"
+            - "9066:9066"
+        tty: true #为容器分配一个伪终端，并接管其stdin/stdout支持交互操作，这时候bash命令不会自动退出
+        volumes:
+            - ./mycat/conf/:/usr/local/mycat/conf/
+            - ./mycat/logs/:/usr/local/mycat/logs/
+        networks:
+            - backend
     redis:
         build:
             context: ./redis
