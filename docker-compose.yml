@@ -66,6 +66,8 @@ services:
         build:
             context: ./mycat
         container_name: mycat
+        environment:
+            - TZ=${WORKSPACE_TIMEZONE}
         ports:
             - "8066:8066"
             - "9066:9066"
