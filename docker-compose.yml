@@ -9,6 +9,8 @@ services:
         build:
             context: ./nginx
         container_name: mynginx
+        environment:
+            - TZ=${WORKSPACE_TIMEZONE}
         ports:
             - 80:80
         volumes:
@@ -39,6 +41,8 @@ services:
                 - MONGODB_EXTENSION_VERSION=${MONGODB_EXTENSION_VERSION}
                 - INSTALL_MONGODB_EXTENSION=${INSTALL_MONGODB_EXTENSION}
         container_name: myphp
+        environment:
+            - TZ=${WORKSPACE_TIMEZONE}
         volumes:
             - ${WORKSPACE_WEBROOT_PATH}:${CONTAINER_WEBROOT_PATH}
             - ./php/php.ini:/usr/local/etc/php/php.ini
@@ -81,6 +85,8 @@ services:
         build:
             context: ./redis
         container_name: myredis
+        environment:
+            - TZ=${WORKSPACE_TIMEZONE}
         ports:
             - ${LOCAL_REDIS_PORT}:6379
         volumes:
